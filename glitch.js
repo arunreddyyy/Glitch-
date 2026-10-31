@@ -104,7 +104,64 @@ function hitTitle() {
             if (f.x < -80) f.x = W + 80; if (f.x > W + 80) f.x = -80;
             if (f.y < -80) f.y = H + 80; if (f.y > H + 80) f.y = -80;
             const px = f.x + (P.x - W / 2) * .04 * f.z, py = f.y + (P.y - H / 2) * .04 * f.z;
-            
+            const d = 2 + (ev.rgb ? 14 : 0) + Math.min(P.v, 60) * .15 * f.z;
+            for (let ch = 0; ch < 3; ch++) {
+                ctx.strokeStyle = ctx.shadowColor = ['#ff1744' , '#00f0ff' , '#2879ff'][ch];
+                ctx.beginPath();
+                for (let i = 0; i <= f.n; i++) {
+                    const a = f.rot + i * 6.283 / f.n;
+                    const x = px +Math.cos(a) * f.r * f.z + (ch - 1) * d, y = py + Math.sin(a) * f.r * f.z;
+                    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+                }
+                ctx.stroke();
+            }
+        }
+        ctx.shadowBlur = 0;
+    }
+    function drawParts(dt) {
+        const R2 = 150 + (P.down ? 100 : 0), k = K();
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const p = parts[i];
+            const dx = p.x - P.x, dy = p.y - P.y, d = Math.hupot(dx, dy) || 1;
+           if (d < R2) {
+            const f = 1 -d / R2;
+            if (P.down) { P.vx += (-dx / d * 1.2 - dy / d * 1.6) * f; P.vy += (-dy / d * 1.2 + dx / d * 1.6) * f; }
+            else { P.vx += dx / d * f * (.5 + P.v * .03) * K; P.vy += dy / d * f * (.5 + P.v * .03) * k; }
+           }   
+           p.x += P.vx * dt * 60 * .5; P.y += P.vy * dt * 60 * .5;
+           P.vx *= .985; p.vy *= .985;
+           if (P.life) { P.life -= dt; if (P.life / P.max * 2); }
+           else{
+            if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+            if (Math.abs(p.vx) < .3) p.vx += R(-.02, .02);
+            ctx.globalAlpha = .5 + .5 * Math.sin(t * 2 + p.x);
+           }
+           const sp = Math.hypot(P.vx, P.vy);
+           ctx.fillStyle = p.c; ctx.fillRect(p.x - sp * .6 -1, p.y, p.s, p.s);
+           ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.s, p.s);
+           if (sp > 2) { ctx.fillStyle = '#00f0ff'; ctx.fillRect(p.x + sp * 6, p.y, p.s, p.s); }
+        }
+        ctx.globalAlpha = 1;
+    }
+    function drawSysm(dt) {
+        if (Math.random() < dt * 6 * K()) syms.push(mkSym(R(0, W), R(0,H)));
+        ctx.textBaseLine = 'middle';
+        for (let i = syms.length - 1; i >= 0; i--) {
+            const s = syms[i]; s.life -= dt;
+            if (s.life <= 0) { syms.splice(i, 1); continue; }
+            ctx.globalAlpha = Math.min(1, s.life / s.max * 2) * (Math.random() < .1 ? .3 : 1);
+            ctx.font = '${s.size | 0}px "Courier New",monospace';
+            ctx.fillStyle = '#ff1744' ; ctx.fillText(s.ch, s.x - 3, s.y);
+            ctx.fillStyle = s.c; ctx.fillText(s.ch, s.x, s.y);
+            if (Math.random() < .05) s.ch = pick(SYM);
+        }
+        ctx.globalAlpha = 1;
+    }
+    function drawRings(dt) {
+        for (let i = rings.length - 1; i >= 0; i--) {
+            const r = rings[i]; r.r += (r.max - r.r) * dt * 3.2; r.a -= dt * 1.1;
+            if (r.a <= 0) {rings.splice(i, 1); continue; }
+            ctx.globalAlpha = r.a; ctx.lineWidth = 2;
         }
     }
 }
