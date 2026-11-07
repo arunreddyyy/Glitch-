@@ -11,10 +11,15 @@ Features
 
  How to Run 
 
+ https://github.com/arunreddyyy/Glitch-.git
+
  Download or clone this repository.
- open project folder
- open html in your browser 
- Then enjoy the glitch effect
+ open project folder.
+ open html in your browser .
+ Then enjoy the glitch effect.
+           "OR"
+ use through the deployed link.
+ https://arunreddyyy.github.io/Glitch-/
  
 <img width="1366" height="768" alt="Screenshot (169)" src="https://github.com/user-attachments/assets/b7fdab66-6439-4025-bc6c-0d0aa9080728" />
 <img width="1366" height="768" alt="Screenshot (170)" src="https://github.com/user-attachments/assets/a50ad62a-1dd9-44b0-9b23-7daaf5571538" />
