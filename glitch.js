@@ -162,6 +162,66 @@ function hitTitle() {
             const r = rings[i]; r.r += (r.max - r.r) * dt * 3.2; r.a -= dt * 1.1;
             if (r.a <= 0) {rings.splice(i, 1); continue; }
             ctx.globalAlpha = r.a; ctx.lineWidth = 2;
+            [['#ff1744', -6], ['#00f0ff' , 0], ['#2979ff', 6]].forEach(([c, o]) => {
+                ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(r.x + o, r.y, r.r,0, 6.283); ctx.stroke();
+            });
+        }
+        ctx.globalAlpha = 1;
+    }
+    function drawCursor(dt) {
+        if (P.x < 0) return;
+        const r = 12 + Math.min(P.v, 80) * .4 + (P.down ? 18 + Math.sin(t * 20) * 6 : 0);
+        ctx.lineWidth = 1.5;
+        [['#ff1744', -3], ['#00f0ff', 3], ['#b400ff', 0]].forEach(([c, o]) => {
+        ctx.strokeStyle = c ; ctx.beginPath(); ctx.arc(P.x + o, P.y, r, 0, 6.283); ctx.stroke();
+    });
+    if (P.v > 25) for (let i = 0; i < Math.min(P.v / 8, 10); i++) {
+        ctx.fillStyle = pick(COL); ctx.globalAlpha = R(.3, .9);
+        ctx.fillRect(P.x + R(-60, 60), P.y + R(-40, 40), R(4, 40), R(1, 5));
+    }
+    ctx.globalAlpha = 1;
+    if(P.down) {
+        const g = ctx.createRadialGradient(P.x, P.y, 0, P.x, P.y, 160);
+        g.addColorStop(0, 'rgba(180,0,255,.25)'); g.addColorStop(1, 'rgba(180,0,255,0)');
+    }
+
+    }
+
+    function localSplit(x, y, rad, off, n) {
+        ctx.globalCompositeOperation = 'source-over';
+        for (let i = 0; i< n; i++) {
+            const sy = Math.max(0, Math.min(H - 12, y + R(-rad, rad))), h = R(3, 14), sx = Math.max(0, x - rad), w = Math.min(rad * 2, W - sx);
+            if (w > 0) ctx.drawImage(cv, sx, sy, w, h, sx + R(-off, off), sy, ew, h);
         }
     }
+    function tear(amount) {
+        for(let i =0; i < 6 + amount * 10; i ++) {
+            const y = R(0,H), h = R(4, 50 * amount + 8);
+        ctx.drawImage(cv, 0, y, W, h, R(-80, 80) * amount, y, W, h);
+            }
+    }
+    function fragment() {
+      for (let i = 0; i < 14; i++) {
+        const w = R(60, W / 3) , h = R(40, H / 4), x = R(0, W - w), y = R(0, H - h);
+        ctx.drawImage(cv , x, y, w, h, x + R(-70, 70), y + R(-50, 50), w,h);  
+      } 
+    }
+    function vhs(){
+        const y = (t * H * .5% (H + 120)) - 60;
+        ctx.drawImage(cv, 0, y, W, 38, R(-40, 40), y, W, 38);
+        ctx.fillStyle = 'rgba(255,255,255, .08)'; ctx.fillRect(0, y + 38, W, 3);
+        ctx.fillStyle = 'rgba(0,240,255,.12)'; ctx.fillRect(0, y, W, 2);
+    }
+    function staticNoise(a) {
+        const d = nctx.createImageData(96, 54);
+        for (let i =0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = v; d.data[i + 1] = v * R(.3, 1); d.data[i + 2] = v; d.data[i + 3] = 255; }
+        nctx.putImageData(d, 0, 0);
+        ctx.globalAlpha = a; ctx.imageSmoothingEnabled = false; ctx.drawImage(noiseC, 0, 0, W, H); ctx.globalAlpha = 1;
+    }
+    function pixelNoise() {
+        const n = 10 * K() + (ev.stat ? 80 : 0);
+        for (let i = 0; i < n; i++) {ctx.fillStyle = pick(COL);ctx.fillRect(R(0, W), R(0, H), R(1, 4), R(1,4)); }
+        }
+
+        
 }
